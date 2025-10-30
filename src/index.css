@@ -8,52 +8,100 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 25% 8%;
+    --background: 222 47% 5%;
     --foreground: 210 40% 98%;
 
-    --card: 220 20% 12%;
+    --card: 222 45% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 220 20% 10%;
+    --popover: 222 45% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 190 95% 50%;
-    --primary-foreground: 220 25% 8%;
+    --primary: 195 100% 50%;
+    --primary-foreground: 222 47% 5%;
 
-    --secondary: 280 70% 60%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 24 100% 56%;
+    --secondary-foreground: 222 47% 5%;
 
-    --muted: 220 15% 20%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 222 30% 15%;
+    --muted-foreground: 210 20% 65%;
 
-    --accent: 190 95% 50%;
-    --accent-foreground: 220 25% 8%;
+    --accent: 195 100% 50%;
+    --accent-foreground: 222 47% 5%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 190 95% 50%;
+    --border: 222 30% 15%;
+    --input: 222 30% 15%;
+    --ring: 195 100% 50%;
 
     --radius: 0.75rem;
 
-    /* Gradient tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(190 95% 50%), hsl(280 70% 60%));
-    --gradient-background: linear-gradient(180deg, hsl(220 25% 8%), hsl(220 20% 12%));
-    --gradient-card: linear-gradient(135deg, hsl(220 20% 12% / 0.8), hsl(220 15% 15% / 0.8));
-    
-    /* Glass effect */
-    --glass-background: hsl(220 20% 15% / 0.4);
-    --glass-border: hsl(190 95% 50% / 0.1);
+    --neon-blue: 195 100% 50%;
+    --neon-orange: 24 100% 56%;
+    --glass-bg: 222 45% 8% / 0.6;
+    --glow-blue: 195 100% 50% / 0.3;
+    --glow-orange: 24 100% 56% / 0.3;
+  }
+}
 
-    /* Shadows with glow */
-    --shadow-glow: 0 0 30px hsl(190 95% 50% / 0.3);
-    --shadow-glow-secondary: 0 0 30px hsl(280 70% 60% / 0.3);
-    --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.4);
+@layer base {
+  * {
+    @apply border-border;
+  }
 
-    /* Animation tokens */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 20px hsl(var(--neon-blue) / 0.6);
+  }
+
+  .glow-border {
+    box-shadow: 0 0 15px hsl(var(--neon-blue) / 0.5);
+  }
+
+  .glass-card {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  .hover-glow {
+    transition: all 0.3s ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 25px hsl(var(--neon-blue) / 0.6), 0 0 50px hsl(var(--neon-blue) / 0.3);
+    transform: translateY(-2px);
+  }
+
+  .neon-gradient {
+    background: linear-gradient(135deg, hsl(var(--neon-blue)) 0%, hsl(var(--neon-orange)) 100%);
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 15px hsl(var(--neon-blue) / 0.5);
+    }
+    50% {
+      box-shadow: 0 0 30px hsl(var(--neon-blue) / 0.8);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
   }
 }
 
@@ -64,65 +112,5 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(180deg, hsl(220 25% 8%), hsl(220 20% 12%));
-    min-height: 100vh;
-  }
-}
-
-@layer utilities {
-  .glass-card {
-    background: var(--glass-background);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-  }
-
-  .gradient-text {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  .animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
-
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient-shift 8s ease infinite;
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px hsl(190 95% 50% / 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px hsl(190 95% 50% / 0.6);
-  }
-}
-
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
   }
 }
