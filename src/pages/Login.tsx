@@ -1,90 +1,83 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock authentication - in real app, validate credentials
-    if (email && password) {
-      localStorage.setItem("isAuthenticated", "true");
-      navigate("/projects");
-    }
+    // Mock login - in real app would authenticate
+    navigate('/projects');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background with floating elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-background animate-gradient bg-[length:200%_200%]" />
-      <div className="absolute top-20 left-20 w-64 h-64 bg-primary/30 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-20 right-20 w-80 h-80 bg-secondary/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
-      
-      <Card className="w-full max-w-md glass-card shadow-[var(--shadow-card)] relative z-10 border-border/50 backdrop-blur-xl">
-        <CardHeader className="space-y-4 text-center pb-8">
-          <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-secondary to-primary bg-[length:200%_200%] flex items-center justify-center animate-gradient shadow-[var(--shadow-glow)]">
-            <Bot className="w-10 h-10 text-primary-foreground animate-pulse" />
-          </div>
-          <div className="space-y-2">
-            <CardTitle className="text-4xl font-bold gradient-text">
-              Welcome Back
-            </CardTitle>
-            <CardDescription className="text-muted-foreground text-base">
-              Enter your credentials to access your dashboard
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground font-medium">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-muted/30 border-border/50 focus:border-primary transition-all h-12 text-base backdrop-blur-sm"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground font-medium">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-muted/30 border-border/50 focus:border-primary transition-all h-12 text-base backdrop-blur-sm"
-                />
-              </div>
+    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
+      {/* Background effects */}
+      <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
+      <div className="fixed inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse-glow" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1s' }} />
+      </div>
+
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md mx-4">
+        <div className="glass-card p-8 rounded-2xl space-y-6 animate-scale-in">
+          {/* Logo */}
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <Sparkles className="w-10 h-10 text-primary animate-pulse-glow" />
             </div>
-            
+            <h1 className="text-3xl font-bold glow-text">Welcome Back</h1>
+            <p className="text-muted-foreground">Sign in to access your dashboard</p>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-muted/50 border-primary/30 focus:border-primary focus:ring-primary/20 transition-all"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-muted/50 border-primary/30 focus:border-primary focus:ring-primary/20 transition-all"
+                required
+              />
+            </div>
+
             <Button 
               type="submit" 
-              className="w-full h-12 bg-gradient-to-r from-primary to-secondary hover:opacity-90 hover:scale-[1.02] transition-all text-primary-foreground font-semibold text-base shadow-[var(--shadow-glow)]"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground glow-border hover-glow"
             >
-              Sign In to Dashboard
+              Sign In
             </Button>
-
-            <div className="text-center">
-              <a href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                ← Back to home
-              </a>
-            </div>
           </form>
-        </CardContent>
-      </Card>
+
+          {/* Footer */}
+          <div className="text-center text-sm text-muted-foreground">
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
