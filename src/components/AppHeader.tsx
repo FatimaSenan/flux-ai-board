@@ -44,9 +44,9 @@ const AppHeader = () => {
             <button
               aria-label="Retour"
               onClick={handleBack}
-              className="inline-flex h-9 items-center gap-2 rounded-md border border-[#F97316]/40 bg-[#1E293B] px-3 text-[#F8FAFC] hover:bg-[#F97316]/90 hover:text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 shadow-sm hover:shadow-[0_0_16px_rgba(249,115,22,0.25)] transition-colors"
+              className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#334155] bg-[#1E293B]/80 px-3 text-[#F8FAFC] hover:bg-[#334155] hover:border-[#F97316]/30 focus:outline-none focus:ring-2 focus:ring-[#F97316]/20 transition-all duration-200 group"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5 group-hover:text-[#F97316] transition-colors" />
               <span className="hidden md:inline text-sm font-medium">Back</span>
             </button>
           ) : (
@@ -88,5 +88,3 @@ const AppHeader = () => {
 };
 
 export default AppHeader;
-
-

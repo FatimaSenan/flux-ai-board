@@ -13,7 +13,9 @@ const Login = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // Mock login - in real app would authenticate
-    navigate('/projects');
+    // mark as authenticated so ProtectedRoute allows /projects
+    localStorage.setItem("isAuthenticated", "true");
+    navigate("/projects");
   };
 
   return (
