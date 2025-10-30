@@ -42,16 +42,7 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="relative z-10 p-6 md:p-12 max-w-7xl mx-auto space-y-8">
 
-        {/* Back button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 rounded-xl
-                     bg-[#1E293B] hover:bg-[#2563EB] text-[#F8FAFC] hover:text-white
-                     transition-all duration-300 shadow-md"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="hidden md:inline text-sm font-medium">Back</span>
-        </button>
+        {/* Back button moved to global header */}
 
         {/* Header */}
         <div className="text-center space-y-2 mb-6">
@@ -120,7 +111,7 @@ const Dashboard = () => {
       <div className="fixed bottom-6 right-6 flex flex-col gap-4">
         <Button
           size="lg"
-          className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[#2563EB] to-[#38BDF8] shadow-lg animate-pulse-glow hover:opacity-90 transition-all"
+          className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary to-secondary shadow-lg animate-pulse-glow hover:opacity-90 transition-all"
           onClick={() => setIsNotificationsOpen(true)}
         >
           <Bell className="w-6 h-6" />
@@ -133,7 +124,7 @@ const Dashboard = () => {
 
         <Button
           size="lg"
-          className="w-14 h-14 rounded-full bg-gradient-to-br from-[#38BDF8] to-[#2563EB] shadow-lg animate-float hover:opacity-90 transition-all"
+          className="w-14 h-14 rounded-full bg-gradient-to-br from-secondary to-primary shadow-lg animate-float hover:opacity-90 transition-all"
           onClick={() => setIsChatOpen(true)}
         >
           <Bot className="w-6 h-6" />
