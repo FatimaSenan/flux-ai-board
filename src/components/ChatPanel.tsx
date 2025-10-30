@@ -71,7 +71,7 @@ const ChatPanel = ({ isOpen, onClose, projectName }: ChatPanelProps) => {
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                   message.role === "user" 
-                    ? "bg-secondary" 
+                    ? "bg-[#F97316]" 
                     : "bg-gradient-to-br from-primary to-accent"
                 }`}>
                   {message.role === "user" ? (
@@ -82,7 +82,7 @@ const ChatPanel = ({ isOpen, onClose, projectName }: ChatPanelProps) => {
                 </div>
                 <div className={`flex-1 p-4 rounded-2xl ${
                   message.role === "user"
-                    ? "bg-secondary/50 border border-border/30"
+                    ? "bg-muted/30 border border-[#F97316]/40"
                     : "bg-muted/30 border border-primary/20"
                 }`}>
                   <p className="text-sm text-foreground">{message.content}</p>
@@ -93,17 +93,20 @@ const ChatPanel = ({ isOpen, onClose, projectName }: ChatPanelProps) => {
         </ScrollArea>
 
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-border/50 bg-background/80 backdrop-blur-sm">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Ask about this project..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSend()}
-              className="bg-muted/50 border-border/50 focus:border-primary"
-            />
+          <div className="flex gap-2 items-center">
+            <div className="rounded-xl p-[2.5px] bg-gradient-to-r from-[#2563EB] to-[#F97316] flex-1">
+              <Input
+                placeholder="Ask about this project..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSend()}
+                className="bg-background border-0 focus-visible:ring-0 focus-visible:outline-none rounded-[10px] px-4 py-2"
+              />
+            </div>
             <Button 
               onClick={handleSend}
-              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+              size="icon"
+              className="bg-gradient-to-r from-[#2563EB] to-[#F97316] hover:opacity-90 transition-opacity"
             >
               <Send className="w-4 h-4" />
             </Button>
