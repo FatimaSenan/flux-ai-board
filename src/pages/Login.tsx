@@ -22,53 +22,66 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-background animate-gradient-shift bg-[length:200%_200%]" />
+      {/* Animated background with floating elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-background animate-gradient bg-[length:200%_200%]" />
+      <div className="absolute top-20 left-20 w-64 h-64 bg-primary/30 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-20 right-20 w-80 h-80 bg-secondary/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
       
-      <Card className="w-full max-w-md glass-card shadow-[var(--shadow-card)] relative z-10 border-border/50">
-        <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center animate-pulse-glow">
-            <Bot className="w-8 h-8 text-primary-foreground" />
+      <Card className="w-full max-w-md glass-card shadow-[var(--shadow-card)] relative z-10 border-border/50 backdrop-blur-xl">
+        <CardHeader className="space-y-4 text-center pb-8">
+          <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-secondary to-primary bg-[length:200%_200%] flex items-center justify-center animate-gradient shadow-[var(--shadow-glow)]">
+            <Bot className="w-10 h-10 text-primary-foreground animate-pulse" />
           </div>
-          <CardTitle className="text-3xl font-bold gradient-text">
-            AI Project Monitor
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Sign in to access your project dashboard
-          </CardDescription>
+          <div className="space-y-2">
+            <CardTitle className="text-4xl font-bold gradient-text">
+              Welcome Back
+            </CardTitle>
+            <CardDescription className="text-muted-foreground text-base">
+              Enter your credentials to access your dashboard
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="user@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-muted/50 border-border/50 focus:border-primary transition-colors"
-              />
+        <CardContent className="pt-0">
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-foreground font-medium">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-muted/30 border-border/50 focus:border-primary transition-all h-12 text-base backdrop-blur-sm"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-foreground font-medium">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="bg-muted/30 border-border/50 focus:border-primary transition-all h-12 text-base backdrop-blur-sm"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-muted/50 border-border/50 focus:border-primary transition-colors"
-              />
-            </div>
+            
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity text-primary-foreground font-semibold"
+              className="w-full h-12 bg-gradient-to-r from-primary to-secondary hover:opacity-90 hover:scale-[1.02] transition-all text-primary-foreground font-semibold text-base shadow-[var(--shadow-glow)]"
             >
-              Sign In
+              Sign In to Dashboard
             </Button>
+
+            <div className="text-center">
+              <a href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                ← Back to home
+              </a>
+            </div>
           </form>
         </CardContent>
       </Card>

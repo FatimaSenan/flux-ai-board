@@ -55,54 +55,56 @@ const mockNotifications = [
 const NotificationsPanel = ({ isOpen, onClose }: NotificationsPanelProps) => {
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl glass-card border-border/50 p-0">
-        <SheetHeader className="p-6 border-b border-border/50">
+      <SheetContent side="right" className="w-full sm:max-w-2xl bg-card/95 backdrop-blur-xl border-border/50 p-0">
+        <SheetHeader className="p-6 border-b border-border/50 bg-card/50">
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl gradient-text">Ticket Changes</SheetTitle>
-            <Badge variant="secondary" className="bg-primary/20 text-primary">
+            <SheetTitle className="text-2xl font-bold gradient-text">Ticket Changes</SheetTitle>
+            <Badge variant="secondary" className="bg-primary/30 text-primary border-primary/20 font-semibold">
               {mockNotifications.length} updates
             </Badge>
           </div>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100vh-100px)] p-6">
+        <ScrollArea className="h-[calc(100vh-100px)] p-6 bg-background/30">
           <div className="space-y-4">
             {mockNotifications.map((notification) => (
-              <Card key={notification.id} className="glass-card border-border/50 p-6 hover:border-primary/30 transition-colors">
+              <Card key={notification.id} className="bg-card/90 backdrop-blur-sm border-border/50 p-6 hover:border-primary/30 hover:shadow-[var(--shadow-glow)] transition-all">
                 <div className="space-y-4">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                        <FileCode className="w-5 h-5 text-primary-foreground" />
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md">
+                        <FileCode className="w-6 h-6 text-primary-foreground" />
                       </div>
                       <div>
-                        <p className="font-semibold text-foreground">{notification.title}</p>
-                        <p className="text-xs text-muted-foreground">{notification.ticketId}</p>
+                        <p className="font-semibold text-foreground text-base">{notification.title}</p>
+                        <p className="text-sm text-primary font-medium">{notification.ticketId}</p>
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">{notification.timestamp}</span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">{notification.timestamp}</span>
                   </div>
 
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                         <span>Previous Description</span>
                       </div>
-                      <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                        <p className="text-sm text-foreground">{notification.oldDescription}</p>
+                      <div className="p-4 rounded-lg bg-destructive/20 border border-destructive/30 backdrop-blur-sm">
+                        <p className="text-sm text-foreground leading-relaxed">{notification.oldDescription}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-center">
-                      <ArrowRight className="w-4 h-4 text-primary" />
+                    <div className="flex items-center justify-center py-1">
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                        <ArrowRight className="w-5 h-5 text-primary" />
+                      </div>
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                         <span>Updated Description</span>
                       </div>
-                      <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                        <p className="text-sm text-foreground">{notification.newDescription}</p>
+                      <div className="p-4 rounded-lg bg-primary/20 border border-primary/30 backdrop-blur-sm">
+                        <p className="text-sm text-foreground leading-relaxed">{notification.newDescription}</p>
                       </div>
                     </div>
                   </div>
