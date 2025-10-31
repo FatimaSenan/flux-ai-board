@@ -66,7 +66,11 @@ const Login = () => {
           {/* Logo */}
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2 mb-6">
-              <Sparkles className="w-10 h-10 text-primary animate-pulse-glow" />
+              <img 
+              src="/m.png" // Chemin vers votre fichier PNG
+              alt="MindTrace Logo" 
+              className="w-16 h-16 animate-logo-glow" // Même taille que l'icône originale
+            />
             </div>
             <h1 className="text-3xl font-bold glow-text">Welcome Back</h1>
             <p className="text-muted-foreground">Sign in to access your dashboard</p>
