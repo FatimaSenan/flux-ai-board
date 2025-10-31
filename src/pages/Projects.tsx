@@ -1,34 +1,34 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot, Users, FileCode, Layers } from "lucide-react";
+import { Users, FileCode } from "lucide-react";
 import BackgroundNetwork from "@/components/ui/BackgroundNetwork";
-
-const mockProjects = [
-  {
-    id: 1,
-    name: "AI Assistant Platform",
-    description: "Next-generation conversational AI with advanced NLP capabilities.",
-    logo: Bot,
-    stats: { users: 45, tickets: 128 },
-  },
-  {
-    id: 2,
-    name: "Cloud Infrastructure",
-    description: "Scalable microservices architecture with Kubernetes orchestration.",
-    logo: Layers,
-    stats: { users: 32, tickets: 89 },
-  },
-  {
-    id: 3,
-    name: "Mobile App Suite",
-    description: "Cross-platform mobile applications for iOS and Android.",
-    logo: FileCode,
-    stats: { users: 28, tickets: 156 },
-  },
-];
+import { mockUsers, allProjects } from "@/data/mockUsers";
+import { useEffect, useState } from "react";
 
 const Projects = () => {
   const navigate = useNavigate();
+  const [userProjects, setUserProjects] = useState(allProjects);
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    // Get logged-in user's email
+    const userEmail = localStorage.getItem("userEmail");
+    const storedUserName = localStorage.getItem("userName");
+    
+    if (userEmail && storedUserName) {
+      setUserName(storedUserName);
+      
+      // Find user and filter projects
+      const user = mockUsers.find((u) => u.email === userEmail);
+      if (user) {
+        const filteredProjects = allProjects.filter((project) =>
+          user.projectIds.includes(project.id)
+        );
+        setUserProjects(filteredProjects);
+      }
+    }
+  }, []);
+
   const handleProjectSelect = (projectId: number) => navigate(`/dashboard/${projectId}`);
 
   return (
@@ -43,14 +43,17 @@ const Projects = () => {
       <div className="relative z-10 p-6 md:p-12 max-w-7xl mx-auto space-y-16">
         {/* Header */}
         <div className="text-center space-y-3">
-          <h1 className="text-5xl font-extrabold gradient-text">My Projects</h1>
-          <p className="text-[#94A3B8] text-lg">Access your dashboards and AI insights.</p>
+          <h1 className="text-5xl font-extrabold gradient-text">
+            {userName ? `${userName}'s Projects` : "My Projects"}
+          </h1>
+          <p className="text-[#94A3B8] text-lg">
+            You have access to {userProjects.length} project{userProjects.length !== 1 ? "s" : ""}.
+          </p>
         </div>
-
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {mockProjects.map((project) => {
+          {userProjects.map((project) => {
             const Icon = project.logo;
             return (
               <Card
