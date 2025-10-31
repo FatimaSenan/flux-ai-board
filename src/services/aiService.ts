@@ -17,6 +17,17 @@ export interface AskResponse {
   contexts: Context[];
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  firstname: string;
+  lastname: string;
+  email: string;
+}
+
 const API_BASE_URL = "http://localhost:6066/api/ai-analyze";
 
 export async function askAssistant({ query, project_id, num_results = 3 }: AskRequest): Promise<AskResponse> {
@@ -41,3 +52,31 @@ export async function askAssistant({ query, project_id, num_results = 3 }: AskRe
     throw error;
   }
 }
+
+  const API_BASE_URL2 = "http://localhost:8081";
+
+
+export async function loginUser({ email, password }: LoginRequest): Promise<LoginResponse> {
+  try {
+    const response = await fetch(`${API_BASE_URL2}/auth/user/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Server error: ${response.status} ${errorText}`);
+    }
+
+    const data: LoginResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error("❌ Login API error:", error);
+    throw error;
+  }
+}
+
+

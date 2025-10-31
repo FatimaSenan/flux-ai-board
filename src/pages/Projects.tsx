@@ -2,33 +2,65 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileCode } from "lucide-react";
 import BackgroundNetwork from "@/components/ui/BackgroundNetwork";
-import { mockUsers, allProjects } from "@/data/mockUsers";
 import { useEffect, useState } from "react";
+
+interface Project {
+  id: number;
+  creator: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  status: string;
+  innerTickets: number;
+  innerFiles: number;
+  users?: number;
+  totalTickets?: number;
+}
+
+const API_BASE_URL = "http://localhost:8081";
 
 const Projects = () => {
   const navigate = useNavigate();
-  const [userProjects, setUserProjects] = useState(allProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [userName, setUserName] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userEmail = localStorage.getItem("userEmail");
     const storedUserName = localStorage.getItem("userName");
+    if (storedUserName) setUserName(storedUserName);
 
-    if (userEmail && storedUserName) {
-      setUserName(storedUserName);
+    async function fetchProjects() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/projects`);
+        const data: Project[] = await response.json();
 
-      const user = mockUsers.find((u) => u.email === userEmail);
-      if (user) {
-        const filteredProjects = allProjects.filter((project) =>
-          user.projectIds.includes(project.id)
+        // Fetch total ticket count per project (optional)
+        const projectsWithTickets = await Promise.all(
+          data.map(async (proj) => {
+            const ticketsRes = await fetch(`${API_BASE_URL}/projects/${proj.id}/tickets`);
+            const tickets = await ticketsRes.json();
+            return {
+              ...proj,
+              totalTickets: tickets.length,
+              users: Math.floor(Math.random() * 50) + 10, // mock number of users
+            };
+          })
         );
-        setUserProjects(filteredProjects);
+
+        setProjects(projectsWithTickets);
+      } catch (err) {
+        console.error("❌ Error fetching projects:", err);
+      } finally {
+        setLoading(false);
       }
     }
+
+    fetchProjects();
   }, []);
 
-  // 👇 projectId is now string
-  const handleProjectSelect = (projectId: string) => navigate(`/dashboard/${projectId}`);
+  const handleProjectSelect = (projectId: number) => navigate(`/dashboard/${projectId}`);
+
+  if (loading) return <div className="text-center text-white pt-20">Loading projects...</div>;
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -41,52 +73,51 @@ const Projects = () => {
             {userName ? `${userName}'s Projects` : "My Projects"}
           </h1>
           <p className="text-[#94A3B8] text-lg">
-            You have access to {userProjects.length} project{userProjects.length !== 1 ? "s" : ""}.
+            {projects.length
+              ? `You have ${projects.length} project${projects.length !== 1 ? "s" : ""}.`
+              : "No projects found."}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {userProjects.map((project) => {
-            const Icon = project.logo;
-            return (
-              <Card
-                key={project.id}
-                onClick={() => handleProjectSelect(project.id)}
-                className="relative group overflow-hidden bg-[#1E293B]/40 backdrop-blur-lg border border-[#38BDF8]/10 rounded-2xl p-1
-                           hover:scale-[1.04] hover:shadow-[0_0_30px_rgba(56,189,248,0.2)] transition-all duration-500 cursor-pointer"
-              >
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-[#38BDF8]/30 via-[#2563EB]/30 to-[#F97316]/20 blur-xl transition-all duration-700" />
+          {projects.map((project) => (
+            <Card
+              key={project.id}
+              onClick={() => handleProjectSelect(project.id)}
+              className="relative group overflow-hidden bg-[#1E293B]/40 backdrop-blur-lg border border-[#38BDF8]/10 rounded-2xl p-1
+                         hover:scale-[1.04] hover:shadow-[0_0_30px_rgba(56,189,248,0.2)] transition-all duration-500 cursor-pointer"
+            >
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-[#38BDF8]/30 via-[#2563EB]/30 to-[#F97316]/20 blur-xl transition-all duration-700" />
 
-                <CardHeader className="space-y-4 relative z-10">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-2 
-                               bg-gradient-to-br from-[#38BDF8] to-[#2563EB] shadow-[0_0_25px_rgba(37,99,235,0.4)] group-hover:scale-110 transition-transform duration-500">
-                    <Icon className="w-8 h-8 text-[#0F172A]" />
+              <CardHeader className="space-y-4 relative z-10">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-2 
+                             bg-gradient-to-br from-[#38BDF8] to-[#2563EB] shadow-[0_0_25px_rgba(37,99,235,0.4)] group-hover:scale-110 transition-transform duration-500">
+                  <FileCode className="w-8 h-8 text-[#0F172A]" />
+                </div>
+
+                <CardTitle className="text-2xl font-semibold text-[#F8FAFC] group-hover:text-[#38BDF8] transition-colors duration-300">
+                  {project.name}
+                </CardTitle>
+
+                <CardDescription className="text-[#94A3B8] text-sm leading-relaxed">
+                  {project.description}
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="relative z-10 border-t border-[#38BDF8]/10 pt-4">
+                <div className="flex items-center justify-between text-sm text-[#94A3B8]">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-[#38BDF8]" />
+                    <span>{project.users} users</span>
                   </div>
-
-                  <CardTitle className="text-2xl font-semibold text-[#F8FAFC] group-hover:text-[#38BDF8] transition-colors duration-300">
-                    {project.name}
-                  </CardTitle>
-
-                  <CardDescription className="text-[#94A3B8] text-sm leading-relaxed">
-                    {project.description}
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="relative z-10 border-t border-[#38BDF8]/10 pt-4">
-                  <div className="flex items-center justify-between text-sm text-[#94A3B8]">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-[#38BDF8]" />
-                      <span>{project.stats.users} users</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FileCode className="w-4 h-4 text-[#F97316]" />
-                      <span>{project.stats.tickets} tickets</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <FileCode className="w-4 h-4 text-[#F97316]" />
+                    <span>{project.totalTickets ?? project.innerTickets} tickets</span>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </div>
