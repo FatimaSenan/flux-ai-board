@@ -2,20 +2,47 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles } from "lucide-react";
+import { Sparkles, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { mockUsers } from "@/data/mockUsers";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - in real app would authenticate
-    // mark as authenticated so ProtectedRoute allows /projects
-    localStorage.setItem("isAuthenticated", "true");
-    navigate("/projects");
+    setError("");
+
+    // Find user in mock data
+    const user = mockUsers.find(
+      (u) => u.email === email && u.password === password
+    );
+
+    if (user) {
+      // Store authentication and user info
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("userEmail", user.email);
+      localStorage.setItem("userName", user.name);
+      
+      toast({
+        title: "Welcome back!",
+        description: `Logged in as ${user.name}`,
+      });
+      
+      navigate("/projects");
+    } else {
+      setError("Invalid email or password");
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: "Invalid email or password",
+      });
+    }
   };
 
   return (
@@ -67,6 +94,13 @@ const Login = () => {
               />
             </div>
 
+            {error && (
+              <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                <AlertCircle className="w-4 h-4" />
+                <span>{error}</span>
+              </div>
+            )}
+
             <Button 
               type="submit" 
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground glow-border hover-glow"
@@ -75,8 +109,14 @@ const Login = () => {
             </Button>
           </form>
 
-          {/* Footer */}
-          <div className="text-center text-sm text-muted-foreground">
+          {/* Demo Credentials */}
+          <div className="text-center text-sm text-muted-foreground space-y-2 border-t border-border/50 pt-4">
+            <p className="font-medium text-foreground">Demo Accounts:</p>
+            <div className="space-y-1 text-xs">
+              <p><span className="text-primary">demo@test.com</span> / demo123</p>
+              <p><span className="text-primary">mouna@test.com</span> / mouna123</p>
+              <p><span className="text-primary">admin@test.com</span> / admin123</p>
+            </div>
           </div>
         </div>
       </div>
