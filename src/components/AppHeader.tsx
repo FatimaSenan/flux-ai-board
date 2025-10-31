@@ -52,7 +52,6 @@ const AppHeader = ({ projectName }: AppHeaderProps = {}) => {
                 className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#334155] bg-[#1E293B]/80 px-3 text-[#F8FAFC] hover:bg-[#334155] hover:border-[#F97316]/30 focus:outline-none focus:ring-2 focus:ring-[#F97316]/20 transition-all duration-200 group"
               >
                 <ChevronLeft className="h-5 w-5 group-hover:text-[#F97316] transition-colors" />
-                <span className="hidden md:inline text-sm font-medium">Back</span>
               </button>
               {projectName && (
                 <span className="text-base md:text-lg font-semibold gradient-text">
@@ -61,13 +60,13 @@ const AppHeader = ({ projectName }: AppHeaderProps = {}) => {
               )}
             </>
           ) : (
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-[#2563EB] to-[#38BDF8] text-white font-bold">
-                F
-              </div>
-              <span className="text-sm font-semibold tracking-wide text-[#F8FAFC] md:text-base">
-                Flux AI Board
-              </span>
+            <div className="flex items-center">
+              <img 
+              src="/m.png" // Chemin vers votre fichier PNG
+              alt="MindTrace Logo" 
+              className="w-12 h-12" // Même taille que l'icône originale
+            />
+            <span className="text-2xl font-bold glow-text">MindTrace</span>
             </div>
           )}
         </div>

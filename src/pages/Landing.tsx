@@ -17,8 +17,13 @@ const Landing = () => {
       {/* Header */}
       <header className="relative z-10 container mx-auto px-6 py-6">
         <nav className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-8 h-8 text-primary" />
+          <div className="flex items-center ">
+            {/* Votre logo PNG qui remplace l'icône Sparkles */}
+            <img 
+              src="/m.png" // Chemin vers votre fichier PNG
+              alt="MindTrace Logo" 
+              className="w-12 h-12" // Même taille que l'icône originale
+            />
             <span className="text-2xl font-bold glow-text">MindTrace</span>
           </div>
           <Button 
@@ -30,6 +35,7 @@ const Landing = () => {
           </Button>
         </nav>
       </header>
+
 
       {/* Hero Section */}
       <main className="relative z-10 container mx-auto px-6 py-20">

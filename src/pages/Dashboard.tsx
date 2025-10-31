@@ -184,7 +184,7 @@ const Dashboard = () => {
 
         {/* Toggle Group - Compact */}
         <div className="flex justify-center">
-          <div className="w-full max-w-3xl mt-0">
+          <div className="w-full max-w-3xl mt-6">
             <ToggleGroup
               type="single"
               value={activeView}
