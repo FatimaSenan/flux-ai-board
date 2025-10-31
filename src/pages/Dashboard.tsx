@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bot, Bell, Users, FileCode, TrendingUp, AlertCircle, ArrowLeft } from "lucide-react";
+import { Bot, Bell, Users, FileCode, TrendingUp, AlertCircle, Send, Maximize2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import ChatPanel from "@/components/ChatPanel";
-import NotificationsPanel from "@/components/NotificationsPanel";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import BackgroundNetwork from "@/components/ui/BackgroundNetwork";
+import VersionDiffModal from "@/components/VersionDiffModal";
 
 const mockDashboardData = {
   1: { name: "AI Assistant Platform", stats: { totalTickets: 128, activeUsers: 45, closedTickets: 89, inProgress: 32, blockers: 7 } },
@@ -14,14 +16,93 @@ const mockDashboardData = {
   3: { name: "Mobile App Suite", stats: { totalTickets: 156, activeUsers: 28, closedTickets: 98, inProgress: 45, blockers: 13 } }
 };
 
+interface Message {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+}
+
+const mockNotifications = [
+  {
+    id: 1,
+    ticket: "PROJ-234",
+    title: "User authentication flow",
+    changes: "Priority changed from Medium to High",
+    time: "5 minutes ago",
+    oldValue: "Medium",
+    newValue: "High",
+    field: "Priority"
+  },
+  {
+    id: 2,
+    ticket: "PROJ-189",
+    title: "Dashboard performance optimization",
+    changes: "Description updated",
+    time: "1 hour ago",
+    oldValue: "Optimize the dashboard loading time",
+    newValue: "Optimize the dashboard loading time and implement lazy loading for charts",
+    field: "Description"
+  },
+  {
+    id: 3,
+    ticket: "PROJ-156",
+    title: "Mobile responsive design",
+    changes: "Status changed from In Progress to Review",
+    time: "3 hours ago",
+    oldValue: "In Progress",
+    newValue: "Review",
+    field: "Status"
+  },
+  {
+    id: 4,
+    ticket: "PROJ-204",
+    title: "Checkout flow improvements",
+    changes: "Description updated",
+    time: "12 minutes ago",
+    oldValue: "Enable guest checkout and add coupon validation.",
+    newValue: "Enable guest checkout, add coupon validation, and display inline error states on payment form.",
+    field: "Description"
+  },
+];
+
 const Dashboard = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [notificationCount] = useState(5);
+  const [activeView, setActiveView] = useState<"chat" | "notifications">("chat");
+  const [messages, setMessages] = useState<Message[]>([
+    { id: 1, role: "assistant", content: "Hello! I'm your AI assistant. How can I help you with this project today?" }
+  ]);
+  const [input, setInput] = useState("");
+  const [selectedNotification, setSelectedNotification] = useState<typeof mockNotifications[0] | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const project = projectId && projectId in mockDashboardData ? mockDashboardData[Number(projectId) as keyof typeof mockDashboardData] : mockDashboardData[1];
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+
+    const userMessage: Message = {
+      id: messages.length + 1,
+      role: "user",
+      content: input
+    };
+
+    setMessages([...messages, userMessage]);
+    setInput("");
+
+    setTimeout(() => {
+      const aiMessage: Message = {
+        id: messages.length + 2,
+        role: "assistant",
+        content: "I understand your question. I'm analyzing the project data and will provide you with relevant insights shortly."
+      };
+      setMessages(prev => [...prev, aiMessage]);
+    }, 1000);
+  };
 
   const statCards = [
     { title: "Total Tickets", value: project.stats.totalTickets, icon: FileCode, color: "from-[#38BDF8] to-[#2563EB]", trend: "+12%" },
@@ -40,39 +121,37 @@ const Dashboard = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A]/90 via-[#0F172A]/95 to-[#0F172A]/98 pointer-events-none" />
 
       {/* Main Content */}
-      <div className="relative z-10 p-6 md:p-12 max-w-7xl mx-auto space-y-8">
-
-        {/* Back button moved to global header */}
+      <div className="relative z-10 p-6 md:p-8 max-w-7xl mx-auto space-y-6">
 
         {/* Header */}
-        <div className="text-center space-y-2 mb-6">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight drop-shadow-lg gradient-text">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight drop-shadow-lg gradient-text">
             {project.name}
           </h1>
-          <p className="text-[#94A3B8] text-lg">
-            Project insights and statistics
+          <p className="text-[#94A3B8]">
+            Project insights and AI assistant
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Stats Grid - Compact */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((stat) => {
             const Icon = stat.icon;
             return (
               <Card
                 key={stat.title}
-                className="glass-card p-4 hover:scale-[1.05] hover:shadow-[0_0_30px_rgba(56,189,248,0.3)] transition-all duration-500 cursor-pointer border border-[#38BDF8]/20"
+                className="glass-card p-3 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(56,189,248,0.2)] transition-all duration-300 border border-[#38BDF8]/20"
               >
-                <CardHeader className="flex items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-[#94A3B8]">{stat.title}</CardTitle>
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}>
-                    <Icon className="w-6 h-6 text-[#0F172A]" />
+                <CardHeader className="flex flex-row items-center justify-between p-0 pb-2">
+                  <CardTitle className="text-xs font-medium text-[#94A3B8]">{stat.title}</CardTitle>
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <Icon className="w-4 h-4 text-[#0F172A]" />
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                   <div className="flex items-end justify-between">
-                    <div className="text-3xl font-bold">{stat.value}</div>
-                    <Badge variant="secondary" className="bg-[#1E293B]/40 text-[#38BDF8]">
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <Badge variant="secondary" className="bg-[#1E293B]/40 text-[#38BDF8] text-xs">
                       {stat.trend}
                     </Badge>
                   </div>
@@ -82,58 +161,137 @@ const Dashboard = () => {
           })}
         </div>
 
-        {/* Recent Activity (compact) */}
-        <Card className="glass-card border border-[#38BDF8]/20 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-[#38BDF8]/20 scrollbar-track-transparent">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {[
-                { color: "#F97316", text: "New feature deployed to staging", time: "2 hours ago" },
-                { color: "#38BDF8", text: "Critical bug fixed in production", time: "5 hours ago" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-[#1E293B]/30 border border-[#38BDF8]/20">
-                  <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: item.color }} />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{item.text}</p>
-                    <p className="text-xs text-[#94A3B8]">{item.time}</p>
-                  </div>
+        {/* Toggle Group */}
+        <div className="flex items-center justify-center gap-2 p-1 glass-card rounded-lg border border-[#38BDF8]/20 w-fit mx-auto">
+          <ToggleGroup type="single" value={activeView} onValueChange={(value) => value && setActiveView(value as "chat" | "notifications")}>
+            <ToggleGroupItem 
+              value="chat" 
+              className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-primary data-[state=on]:to-secondary data-[state=on]:text-primary-foreground"
+            >
+              <Bot className="w-4 h-4 mr-2" />
+              AI Assistant
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="notifications" 
+              className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-primary data-[state=on]:to-secondary data-[state=on]:text-primary-foreground relative"
+            >
+              <Bell className="w-4 h-4 mr-2" />
+              Notifications
+              <Badge className="ml-2 bg-[#F97316] text-[#0F172A] text-xs h-5 px-1.5">
+                {mockNotifications.length}
+              </Badge>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
+        {/* Main Content Area */}
+        <Card className="glass-card border border-[#38BDF8]/20 h-[calc(100vh-380px)] flex flex-col">
+          {activeView === "chat" ? (
+            <>
+              {/* Chat Header */}
+              <CardHeader className="border-b border-[#38BDF8]/20 pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl font-semibold gradient-text">AI Assistant</CardTitle>
+                  <Badge variant="secondary" className="bg-[#1E293B]/40 text-[#38BDF8]">
+                    Active
+                  </Badge>
                 </div>
-              ))}
-            </div>
-          </CardContent>
+              </CardHeader>
+
+              {/* Chat Messages */}
+              <CardContent className="flex-1 overflow-hidden p-0">
+                <ScrollArea className="h-full p-6">
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                      >
+                        <div
+                          className={`max-w-[80%] rounded-lg p-4 ${
+                            message.role === "user"
+                              ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+                              : "glass-card border border-[#38BDF8]/20"
+                          }`}
+                        >
+                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+              </CardContent>
+
+              {/* Chat Input */}
+              <div className="p-4 border-t border-[#38BDF8]/20">
+                <div className="flex gap-2">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    placeholder="Ask me anything about your project..."
+                    className="flex-1 bg-[#1E293B]/40 border-[#38BDF8]/20"
+                  />
+                  <Button
+                    onClick={handleSend}
+                    className="bg-gradient-to-r from-primary to-secondary hover:opacity-90"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Notifications Header */}
+              <CardHeader className="border-b border-[#38BDF8]/20 pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl font-semibold gradient-text">Recent Changes</CardTitle>
+                  <Badge variant="secondary" className="bg-primary/30 text-primary border-primary/20">
+                    {mockNotifications.length} updates
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              {/* Notifications List */}
+              <CardContent className="flex-1 overflow-hidden p-0">
+                <ScrollArea className="h-full p-6">
+                  <div className="space-y-3">
+                    {mockNotifications.map((n) => (
+                      <Card
+                        key={n.id}
+                        onClick={() => setSelectedNotification(n)}
+                        className="glass-card p-4 rounded-lg transition-all hover:shadow-[0_4px_18px_rgba(56,189,248,0.18)] hover:border-primary/20 cursor-pointer"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono text-primary">{n.ticket}</span>
+                              <span className="text-xs text-muted-foreground">•</span>
+                              <span className="text-xs text-muted-foreground">{n.time}</span>
+                            </div>
+                            <p className="text-sm font-medium">{n.title}</p>
+                            <p className="text-xs text-muted-foreground">{n.changes}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </>
+          )}
         </Card>
 
       </div>
 
-      {/* Floating Buttons */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-4">
-        <Button
-          size="lg"
-          className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary to-secondary shadow-lg animate-pulse-glow hover:opacity-90 transition-all"
-          onClick={() => setIsNotificationsOpen(true)}
-        >
-          <Bell className="w-6 h-6" />
-          {notificationCount > 0 && (
-            <Badge className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0 flex items-center justify-center bg-[#F97316] text-[#0F172A]">
-              {notificationCount}
-            </Badge>
-          )}
-        </Button>
-
-        <Button
-          size="lg"
-          className="w-14 h-14 rounded-full bg-gradient-to-br from-secondary to-primary shadow-lg animate-float hover:opacity-90 transition-all"
-          onClick={() => setIsChatOpen(true)}
-        >
-          <Bot className="w-6 h-6" />
-        </Button>
-      </div>
-
-      {/* Panels */}
-      <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} projectName={project.name} />
-      <NotificationsPanel isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
+      {/* Version Diff Modal */}
+      <VersionDiffModal
+        isOpen={!!selectedNotification}
+        onClose={() => setSelectedNotification(null)}
+        notification={selectedNotification}
+      />
     </div>
   );
 };
