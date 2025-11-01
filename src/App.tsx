@@ -12,12 +12,6 @@ import AppHeader from "./components/AppHeader";
 
 const queryClient = new QueryClient();
 
-const mockDashboardData = {
-  1: { name: "AI Assistant Platform" },
-  2: { name: "Cloud Infrastructure" },
-  3: { name: "Mobile App Suite" }
-};
-
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
@@ -32,13 +26,12 @@ const HeaderWrapper = () => {
 
 const DashboardWithHeader = () => {
   const { projectId } = useParams();
-  const project = projectId && projectId in mockDashboardData 
-    ? mockDashboardData[Number(projectId) as keyof typeof mockDashboardData] 
-    : mockDashboardData[1];
   
+  // We'll pass the projectId to the Dashboard component and let it handle fetching the project name
+  // The AppHeader will get the project name from the Dashboard through props or context
   return (
     <>
-      <AppHeader projectName={project.name} />
+      <AppHeader projectId={projectId} />
       <Dashboard />
     </>
   );

@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { mockUsers } from "@/data/mockUsers";
 import { useToast } from "@/hooks/use-toast";
+import { loginUser } from "@/services/aiService";
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,35 +14,38 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    // Find user in mock data
-    const user = mockUsers.find(
-      (u) => u.email === email && u.password === password
-    );
+    try {
+      const data = await loginUser({ email, password });
 
-    if (user) {
-      // Store authentication and user info
+      // Store in localStorage
+      localStorage.setItem("userId", data.id.toString());
       localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userEmail", user.email);
-      localStorage.setItem("userName", user.name);
-      
+      localStorage.setItem("userEmail", data.email);
+      localStorage.setItem("userName", `${data.firstname} ${data.lastname}`);
+
       toast({
-        title: "Welcome back!",
-        description: `Logged in as ${user.name}`,
+        title: `Welcome back, ${data.firstname}!`,
+        description: "You’ve successfully logged in.",
       });
-      
+
       navigate("/projects");
-    } else {
+    } catch (err) {
+      console.error("Login failed:", err);
       setError("Invalid email or password");
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: "Invalid email or password",
+        description: "Invalid credentials or server error.",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,7 +55,10 @@ const Login = () => {
       <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
       <div className="fixed inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse-glow" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1s' }} />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-[120px] animate-pulse-glow"
+          style={{ animationDelay: "1s" }}
+        />
       </div>
 
       {/* Login Card */}
@@ -60,7 +67,11 @@ const Login = () => {
           {/* Logo */}
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2 mb-6">
-              <Sparkles className="w-10 h-10 text-primary animate-pulse-glow" />
+              <img 
+              src="/m.png" // Chemin vers votre fichier PNG
+              alt="MindTrace Logo" 
+              className="w-16 h-16 animate-logo-glow" // Même taille que l'icône originale
+            />
             </div>
             <h1 className="text-3xl font-bold glow-text">Welcome Back</h1>
             <p className="text-muted-foreground">Sign in to access your dashboard</p>
@@ -101,23 +112,14 @@ const Login = () => {
               </div>
             )}
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
+              disabled={loading}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground glow-border hover-glow"
             >
-              Sign In
+              {loading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="text-center text-sm text-muted-foreground space-y-2 border-t border-border/50 pt-4">
-            <p className="font-medium text-foreground">Demo Accounts:</p>
-            <div className="space-y-1 text-xs">
-              <p><span className="text-primary">demo@test.com</span> / demo123</p>
-              <p><span className="text-primary">mouna@test.com</span> / mouna123</p>
-              <p><span className="text-primary">admin@test.com</span> / admin123</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

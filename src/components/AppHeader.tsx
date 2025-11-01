@@ -9,21 +9,43 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
 
 interface AppHeaderProps {
-  projectName?: string;
+  projectId?: string;
 }
 
-const AppHeader = ({ projectName }: AppHeaderProps = {}) => {
+const API_BASE_URL = "http://localhost:8081";
+
+const AppHeader = ({ projectId }: AppHeaderProps = {}) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [projectName, setProjectName] = useState<string>("");
 
   const isMain = location.pathname === "/projects";
   const isPublic = location.pathname === "/" || location.pathname === "/login";
   const shouldShowBack = !isPublic && !isMain;
 
+  // Fetch project name when projectId is provided
+  useEffect(() => {
+    async function fetchProjectName() {
+      if (!projectId) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/projects/${projectId}`);
+        if (response.ok) {
+          const project = await response.json();
+          setProjectName(project.name);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching project name:", err);
+      }
+    }
+
+    fetchProjectName();
+  }, [projectId]);
+
   const handleBack = () => {
-    // Retourne vers la page des projets par défaut
     navigate("/projects");
   };
 
@@ -52,7 +74,6 @@ const AppHeader = ({ projectName }: AppHeaderProps = {}) => {
                 className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#334155] bg-[#1E293B]/80 px-3 text-[#F8FAFC] hover:bg-[#334155] hover:border-[#F97316]/30 focus:outline-none focus:ring-2 focus:ring-[#F97316]/20 transition-all duration-200 group"
               >
                 <ChevronLeft className="h-5 w-5 group-hover:text-[#F97316] transition-colors" />
-                <span className="hidden md:inline text-sm font-medium">Back</span>
               </button>
               {projectName && (
                 <span className="text-base md:text-lg font-semibold gradient-text">
@@ -61,13 +82,13 @@ const AppHeader = ({ projectName }: AppHeaderProps = {}) => {
               )}
             </>
           ) : (
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-[#2563EB] to-[#38BDF8] text-white font-bold">
-                F
-              </div>
-              <span className="text-sm font-semibold tracking-wide text-[#F8FAFC] md:text-base">
-                Flux AI Board
-              </span>
+            <div className="flex items-center">
+              <img 
+                src="/m.png"
+                alt="MindTrace Logo" 
+                className="w-12 h-12"
+              />
+              <span className="text-2xl font-bold glow-text">MindTrace</span>
             </div>
           )}
         </div>
