@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bot, FileCode, TrendingUp, AlertCircle, Send, User, FileText, Upload, X } from "lucide-react";
+import { Bot, FileCode, TrendingUp, AlertCircle, Send, User, FileText, Upload, X, Bell, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,21 @@ interface Message {
   content: string;
 }
 
+interface Notification {
+  ticketId: number;
+  ticketName: string;
+  description: string;
+  read?: boolean;
+}
+
+interface TicketVersion {
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+  creator: string;
+  project: string;
+}
 interface ProjectFile {
   id: number;
   name: string;
@@ -42,6 +57,7 @@ const Dashboard = () => {
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState<string>("");
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [files, setFiles] = useState<ProjectFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [filesLoading, setFilesLoading] = useState(false);
@@ -51,7 +67,14 @@ const Dashboard = () => {
     { id: 1, role: "assistant", content: "Hello! I'm your AI assistant. How can I help you with this project today?" }
   ]);
   const [input, setInput] = useState("");
-  const [selectedNotification, setSelectedNotification] = useState<any | null>(null);
+  const [selectedNotification, setSelectedNotification] = useState<{
+    ticketId: number;
+    ticketName: string;
+    description: string;
+    versions?: TicketVersion[];
+  } | null>(null);
+
+  // 🟢 Fetch project tickets + info + notifications
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -75,6 +98,24 @@ const Dashboard = () => {
         setTickets(ticketsData);
         setProjectName(projectData.name);
 
+        // Fetch notifications
+        const notificationsRes = await fetch(`${API_BASE_URL}/modifications/latest`);
+        const notificationsData: Notification[] = await notificationsRes.json();
+        // Ajouter le statut "read" à false par défaut
+        const notificationsWithReadStatus = notificationsData.map(notification => ({
+          ...notification,
+          read: false
+        }));
+        setNotifications(notificationsWithReadStatus);
+
+        if (ticketsData.length > 0 && ticketsData[0].project) {
+          setProjectName(ticketsData[0].project);
+        } else {
+          // fallback — fetch project name from projects endpoint
+          const projRes = await fetch(`${API_BASE_URL}/projects/${projectId}`);
+          const proj = await projRes.json();
+          setProjectName(proj.name);
+        }
       } catch (err) {
         console.error("❌ Error fetching project data:", err);
         // Set default values to prevent loading state
@@ -88,6 +129,37 @@ const Dashboard = () => {
     fetchProjectData();
   }, [projectId]);
 
+  // 🟢 Marquer une notification comme lue
+  const markNotificationAsRead = (ticketId: number) => {
+    setNotifications(prevNotifications => 
+      prevNotifications.map(notification => 
+        notification.ticketId === ticketId 
+          ? { ...notification, read: true }
+          : notification
+      )
+    );
+  };
+
+  // 🟢 Fetch ticket versions when notification is selected
+  const handleNotificationClick = async (notification: Notification) => {
+    try {
+      // Marquer la notification comme lue
+      markNotificationAsRead(notification.ticketId);
+
+      const versionsRes = await fetch(`${API_BASE_URL}/tickets/${notification.ticketId}/versions`);
+      const versionsData: TicketVersion[] = await versionsRes.json();
+      
+      setSelectedNotification({
+        ...notification,
+        versions: versionsData
+      });
+    } catch (error) {
+      console.error("❌ Error fetching ticket versions:", error);
+      setSelectedNotification(notification);
+    }
+  };
+
+  // 🧮 Compute stats
   // 🗂️ Fetch project files
   const fetchProjectFiles = async () => {
     if (!projectId) return;
@@ -183,6 +255,9 @@ const Dashboard = () => {
   const completed = tickets.filter((t) => t.status === "COMPLETED").length;
   const inProgress = tickets.filter((t) => t.status === "IN_PROGRESS").length;
   const starting = tickets.filter((t) => t.status === "STARTING").length;
+
+  // 🧮 Calculer le nombre de notifications non lues
+  const unreadNotificationsCount = notifications.filter(notification => !notification.read).length;
 
   const stats = [
     { title: "Total Tickets", value: totalTickets, icon: FileCode, color: "from-[#38BDF8] to-[#2563EB]" },
@@ -297,7 +372,8 @@ const Dashboard = () => {
                 value="notifications"
                 className="flex-1 data-[state=on]:bg-gradient-to-r data-[state=on]:from-[#38BDF8] data-[state=on]:to-[#2563EB] data-[state=on]:text-white relative text-sm font-medium flex items-center justify-center gap-1.5 py-2.5 transition-all"
               >
-                Notifications
+                <Bell className="w-4 h-4" />
+                Notifications ({unreadNotificationsCount})
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -498,15 +574,54 @@ const Dashboard = () => {
                 </CardContent>
               </>
             ) : (
-              <CardContent className="flex items-center justify-center text-muted-foreground text-sm">
-                {loading ? "Loading notifications..." : "No notifications yet."}
+              <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
+                {/* ScrollArea avec scroll invisible */}
+                <ScrollArea className="flex-1 scroll-area-hide">
+                  <div className="p-4 md:p-6 w-full space-y-3">
+                    {notifications.length === 0 ? (
+                      <div className="text-center text-muted-foreground text-sm py-8 w-full">
+                        No notifications yet.
+                      </div>
+                    ) : (
+                      notifications.map((notification, index) => (
+                        <Card
+                          key={index}
+                          onClick={() => handleNotificationClick(notification)}
+                          className={`glass-card p-3 rounded-lg transition-all hover:shadow-[0_4px_18px_rgba(56,189,248,0.18)] hover:border-primary/20 cursor-pointer w-full ${
+                            notification.read ? 'opacity-60' : 'border-l-4 border-l-blue-500'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2 w-full">
+                            <div className="flex-1 space-y-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-mono text-primary">Ticket #{notification.ticketId}</span>
+                                {!notification.read && (
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                                )}
+                              </div>
+                              <p className="text-sm font-medium truncate">{notification.ticketName}</p>
+                              <p className="text-xs text-muted-foreground line-clamp-2">{notification.description}</p>
+                            </div>
+                            <Button variant="ghost" size="sm" className="flex-shrink-0">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
               </CardContent>
             )}
           </Card>
         </div>
       </div>
 
-      <VersionDiffModal isOpen={!!selectedNotification} onClose={() => setSelectedNotification(null)} notification={selectedNotification} />
+      <VersionDiffModal 
+        isOpen={!!selectedNotification} 
+        onClose={() => setSelectedNotification(null)} 
+        notification={selectedNotification} 
+      />
     </div>
   );
 };
