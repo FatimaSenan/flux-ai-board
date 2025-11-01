@@ -25,6 +25,7 @@ const Login = () => {
       const data = await loginUser({ email, password });
 
       // Store in localStorage
+      localStorage.setItem("userId", data.id.toString());
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("userEmail", data.email);
       localStorage.setItem("userName", `${data.firstname} ${data.lastname}`);
