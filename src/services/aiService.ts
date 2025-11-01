@@ -23,6 +23,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
+  id: number;
   firstname: string;
   lastname: string;
   email: string;
@@ -30,7 +31,7 @@ export interface LoginResponse {
 
 const API_BASE_URL = "http://localhost:6066/api/ai-analyze";
 
-export async function askAssistant({ query, project_id, num_results = 3 }: AskRequest): Promise<AskResponse> {
+export async function askAssistant({ query, project_id, num_results = 1 }: AskRequest): Promise<AskResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/ask`, {
       method: "POST",

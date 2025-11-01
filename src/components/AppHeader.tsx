@@ -9,21 +9,43 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
 
 interface AppHeaderProps {
-  projectName?: string;
+  projectId?: string;
 }
 
-const AppHeader = ({ projectName }: AppHeaderProps = {}) => {
+const API_BASE_URL = "http://localhost:8081";
+
+const AppHeader = ({ projectId }: AppHeaderProps = {}) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [projectName, setProjectName] = useState<string>("");
 
   const isMain = location.pathname === "/projects";
   const isPublic = location.pathname === "/" || location.pathname === "/login";
   const shouldShowBack = !isPublic && !isMain;
 
+  // Fetch project name when projectId is provided
+  useEffect(() => {
+    async function fetchProjectName() {
+      if (!projectId) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/projects/${projectId}`);
+        if (response.ok) {
+          const project = await response.json();
+          setProjectName(project.name);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching project name:", err);
+      }
+    }
+
+    fetchProjectName();
+  }, [projectId]);
+
   const handleBack = () => {
-    // Retourne vers la page des projets par défaut
     navigate("/projects");
   };
 
@@ -62,11 +84,11 @@ const AppHeader = ({ projectName }: AppHeaderProps = {}) => {
           ) : (
             <div className="flex items-center">
               <img 
-              src="/m.png" // Chemin vers votre fichier PNG
-              alt="MindTrace Logo" 
-              className="w-12 h-12" // Même taille que l'icône originale
-            />
-            <span className="text-2xl font-bold glow-text">MindTrace</span>
+                src="/m.png"
+                alt="MindTrace Logo" 
+                className="w-12 h-12"
+              />
+              <span className="text-2xl font-bold glow-text">MindTrace</span>
             </div>
           )}
         </div>
