@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { loginUser } from "@/services/aiService";
-
+import { mockUsers } from "@/data/mockUsers";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,9 +22,9 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // Try real API first
       const data = await loginUser({ email, password });
 
-      // Store in localStorage
       localStorage.setItem("userId", data.id.toString());
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("userEmail", data.email);
@@ -32,18 +32,37 @@ const Login = () => {
 
       toast({
         title: `Welcome back, ${data.firstname}!`,
-        description: "You’ve successfully logged in.",
+        description: "You've successfully logged in.",
       });
 
       navigate("/projects");
     } catch (err) {
-      console.error("Login failed:", err);
-      setError("Invalid email or password");
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: "Invalid credentials or server error.",
-      });
+      // Fallback to mock authentication for preview/demo
+      const mockUser = mockUsers.find(
+        (u) => u.email === email && u.password === password
+      );
+
+      if (mockUser) {
+        localStorage.setItem("userId", mockUser.email);
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("userEmail", mockUser.email);
+        localStorage.setItem("userName", mockUser.name);
+
+        toast({
+          title: `Welcome back, ${mockUser.name}!`,
+          description: "You've successfully logged in (demo mode).",
+        });
+
+        navigate("/projects");
+      } else {
+        console.error("Login failed:", err);
+        setError("Invalid email or password");
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: "Invalid credentials.",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -68,9 +87,9 @@ const Login = () => {
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2 mb-6">
               <img 
-              src="/m.png" // Chemin vers votre fichier PNG
+              src="/m.png"
               alt="MindTrace Logo" 
-              className="w-16 h-16 animate-logo-glow" // Même taille que l'icône originale
+              className="w-16 h-16 animate-logo-glow"
             />
             </div>
             <h1 className="text-3xl font-bold glow-text">Welcome Back</h1>
@@ -120,6 +139,11 @@ const Login = () => {
               {loading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
+
+          {/* Demo credentials hint */}
+          <div className="text-center text-xs text-muted-foreground border-t border-border/50 pt-4">
+            <p>Demo: demo@test.com / demo123</p>
+          </div>
         </div>
       </div>
     </div>
